@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>RegistrationForm_v10 by Colorlib</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- LINEARICONS -->
+  <link rel="stylesheet" href="fonts/linearicons/style.css">
+
+  <!-- STYLE CSS -->
+  <link rel="stylesheet" href="css/register.css">
+  <!-- BOOTSTRAP CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css">
+</head>
+
+<body>
+  <div class="wrapper">
+    <div class="inner">
+      <img src="images/image-1.png" alt="" class="image-1">
+      <div class="container">
+        <form action="/api/student/register" id="registerForm" method="POST">
+          <h3>New Account?</h3>
+          <div class="form-group">
+            <span class="lnr lnr-user"></span>
+            <input type="text" class="form-control" name="Username" placeholder="Name" required>
+          </div>
+          <div class="form-group">
+            <span class="lnr lnr-phone-handset"></span>
+            <input type="text" class="form-control" name="PhoneNumber" placeholder="Phone Number" pattern="^(\+63|0)\d{10}$" required title="Please enter a valid Philippine phone number.">
+          </div>
+          <div class="form-group">
+            <span class="lnr lnr-envelope"></span>
+            <input type="email" class="form-control" name="Email" placeholder="E-Mail" required>
+          </div>
+          <div class="form-group">
+            <span class="lnr lnr-lock"></span>
+            <input type="password" class="form-control" name="Password" placeholder="Password" id="passwordInput" required>
+            <span id="passwordStrengthMessage"></span>
+          </div>
+          <div class="form-group">
+            <span class="lnr lnr-lock"></span>
+            <input type="password" class="form-control" name="ConfirmPassword" placeholder="Confirm Password" required>
+          </div>
+          <div class="form-group">
+            <span class="lnr lnr-apartment"></span>
+            <select class="form-control" id="regDepartment" name="Department" required>
+              <option value="" disabled selected>Select a Department</option>
+            </select>  
+          </div>
+          <div class="form-group">
+            <span class="lnr lnr-graduation-hat"></span>
+            <select class="form-control" name="YearLevel">
+              <option value="" disabled selected>Year Level</option>
+              <option value="freshman">Freshman</option>
+              <option value="sophomore">Sophomore</option>
+              <option value="junior">Junior</option>
+              <option value="senior">Senior</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <span class="lnr lnr-apartment"></span>
+            <select class="form-control" name="StudentSection" id="sectionSelect">
+              <option value="" disabled selected>Select your Section</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="birthday">Birthday</label>
+            <input type="date" class="form-control" name="Birthday" placeholder="Birthday">
+          </div>
+          <input type="hidden" name="UserType" value="student">
+          <button type="submit" id="registerButton" class="btn btn-primary">
+            <span>Register</span>
+          </button>
+        </form>
+        <!-- Error alert container -->
+        <div id="errorAlert" class="alert alert-danger mt-4" style="display: none;"></div>
+      </div>
+      <img src="images/image-2.png" alt="" class="image-2">
+    </div>
+  </div>
+
+  <script src="js/jquery-3.3.1.min.js"></script>
+  <script src="js/main.js"></script>
+  <!-- BOOTSTRAP JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.min.js"></script>
+
+  <script>
+
+    // Password validation and strength check
+    document.getElementById('passwordInput').addEventListener('input', function () {
+      const passwordInput = document.getElementById('passwordInput');
+      const password = passwordInput.value;
+      const passwordStrengthMessage = document.getElementById('passwordStrengthMessage');
+
+      // Regex patterns for password strength requirements
+      const lowercaseRegex = /[a-z]/;
+      const uppercaseRegex = /[A-Z]/;
+      const numberRegex = /[0-9]/;
+      const specialCharRegex = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/;
+
+      // Check password strength based on the defined requirements
+      if (password.length < 8 || !lowercaseRegex.test(password) || !uppercaseRegex.test(password) || !numberRegex.test(password) || !specialCharRegex.test(password)) {
+        passwordStrengthMessage.textContent = 'Weak password: Password must be at least 8 characters long and contain lowercase, uppercase, number, and special character.';
+      } else {
+        passwordStrengthMessage.textContent = ''; // Clear the password strength message if the password meets the requirements
+      }
+    });    
+
+    // Handle register form submission
+    document.getElementById('registerForm').addEventListener('submit', function (event) {
+      event.preventDefault(); // Prevent the form from submitting normally
+
+      // Get the form data
+      const username = document.querySelector('input[name="Username"]').value;
+      const phoneNumber = document.querySelector('input[name="PhoneNumber"]').value;
+      const email = document.querySelector('input[name="Email"]').value;
+      const password = document.querySelector('input[name="Password"]').value;
+      const confirmPassword = document.querySelector('input[name="ConfirmPassword"]').value;
+      const department = document.querySelector('select[name="Department"]').value;
+      const yearLevel = document.querySelector('select[name="YearLevel"]').value;
+      const birthday = document.querySelector('input[name="Birthday"]').value;
+      const userType = document.querySelector('input[name="UserType"]').value;
+      const studentSection = document.querySelector('select[name="StudentSection"]').value;
+
+      // Create a data object to send in the request body
+      const data = {
+        username: username,
+        phoneNumber: phoneNumber,
+        email: email,
+        password: password,
+        confirmPassword: confirmPassword,
+        department: department,
+        yearLevel: yearLevel,
+        birthday: birthday,
+        userType: userType,
+        studentSection: studentSection,
+      };
+
+      // Send a POST request to the register endpoint
+      fetch('/api/student/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+        .then(response => response.json())
+        .then(data => {
+          // Handle the response from the server
+          console.log(data);
+          // Check if the registration was successful
+          if (data.message === 'Student registered successfully') {
+            // Redirect to the login page
+            window.location.href = data.redirect;
+          } else {
+            // Display an alert if the email already exists
+            if (data.message === 'A user with the same email already exists') {
+              showErrorAlert('Email already exists. Please use a different email.');
+            }
+          }
+        })
+        .catch(error => {
+          console.error(error);
+          showErrorAlert('An error occurred during registration. Please try again later.');
+        });
+    });
+
+    // Fetch sections from the server and populate the dropdown
+    fetch('/api/sections')
+      .then(response => response.json())
+      .then(data => {
+        const sectionSelect = document.getElementById('sectionSelect');
+        data.sections.forEach(section => {
+          const option = document.createElement('option');
+          option.value = section.name;
+          option.textContent = section.name;
+          sectionSelect.appendChild(option);
+        });
+      })
+      .catch(error => {
+        console.error(error);
+        showErrorAlert('Failed to fetch sections. Please try again later.');
+      });
+
+    // Fetch departments from the server and populate the dropdown
+    fetch('/api/departments')
+      .then(response => response.json())
+      .then(data => {
+        const regDepartment = document.getElementById('regDepartment');
+        data.forEach(department => {
+          const option = document.createElement('option');
+          option.value = department.name;
+          option.text = department.name;
+          regDepartment.appendChild(option);
+        });
+      })
+      .catch(error => {
+        console.error(error);
+        showErrorAlert('Failed to fetch departments. Please try again later.');
+      });
+
+    // Function to show error alert with the provided message
+    function showErrorAlert(message) {
+      const errorAlert = document.getElementById('errorAlert');
+      errorAlert.textContent = message;
+      errorAlert.style.display = 'block';
+    }
+
+    // Phone number validation
+    document.querySelector('input[name="PhoneNumber"]').addEventListener('input', function() {
+      const phoneNumberInput = document.querySelector('input[name="PhoneNumber"]');
+      const phoneNumber = phoneNumberInput.value;
+      const phoneNumberErrorMessage = document.getElementById('phoneNumberErrorMessage');
+      const isValidPhoneNumber = validatePhoneNumber(phoneNumber);
+      if (!isValidPhoneNumber) {
+        phoneNumberErrorMessage.textContent = 'Please enter a valid Philippine phone number.';
+        phoneNumberErrorMessage.style.display = 'block';
+      } else {
+        phoneNumberErrorMessage.textContent = '';
+        phoneNumberErrorMessage.style.display = 'none';
+      }
+    });
+    
+    // Validate Philippine phone number
+    function validatePhoneNumber(phoneNumber) {
+      const phoneNumberRegex = /^(09|\+639)\d{9}$/;
+      return phoneNumberRegex.test(phoneNumber);
+    }	
+      
+  </script>
+
+</body>
+</html>

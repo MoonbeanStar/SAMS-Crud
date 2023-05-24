@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Admin Page</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+<!-- Include the necessary dependencies -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
+
+  <style>
+    /* Optional custom styles */
+    .container {
+      margin-top: 50px;
+    }
+    thead {
+      background-color: lightblue;
+    }
+    .edit-button {
+      background-color: orange;
+      color: white;
+    }
+    .delete-button {
+      background-color: red;
+      color: white;
+    }
+    .add-teacher-button {
+      border-radius: 5px;
+      background-color: green;
+    }
+    .search-container {
+      width: fit-content;
+      display: flex;
+      align-items: center;
+      padding-bottom: 20px;
+    }
+    .search-bar {
+      flex: 1;
+      margin-right: 10px;
+    }
+    .search-button {
+      margin-left: 10px;
+    }
+  
+    #studentSearchInput, #teacherSearchInput, #attendanceSearchInput{
+      width: 100%;
+    }
+  </style>
+  
+</head>
+<body>
+  <div class="container">
+    <h1 class="text-center">Student Attendance Management System</h1>
+    <ul class="nav nav-pills justify-content-center" id="myTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="student-tab" data-bs-toggle="pill" data-bs-target="#student" type="button" role="tab" aria-controls="student" aria-selected="true">Student</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="teacher-tab" data-bs-toggle="pill" data-bs-target="#teacher" type="button" role="tab" aria-controls="teacher" aria-selected="false">Teacher</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="attendance-record-tab" data-bs-toggle="pill" data-bs-target="#attendance-record" type="button" role="tab" aria-controls="attendance-record" aria-selected="false">Attendance Record</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="logout-tab" data-bs-toggle="pill" data-bs-target="#logout" type="button" role="tab" aria-controls="logout" aria-selected="false">Logout</button>
+      </li>
+    </ul>
+    <div class="tab-content mt-2" id="myTabContent">
+      <div class="tab-pane fade show active" id="student" role="tabpanel" aria-labelledby="student-tab">
+        <h2>Student List</h2>
+        <!-- <div class="search-container d-flex align-items-center">
+          <div class="search-bar">
+            <input type="text" id="studentSearchInput" class="form-control" placeholder="Search student...">
+          </div>
+          <div class="search-button">
+            <button type="button" id="studentSearchButton" class="btn btn-primary">Search</button>
+          </div>
+        </div>         -->
+        <div class="table-responsive">
+          <table class="table table-bordered" id="studentTable" data-toggle="table" data-sortable="true">
+            <thead style="background-color: lightblue;">
+              <tr>
+                <th data-field="username" data-sortable="true">Name</th>
+                <th data-field="phoneNumber" data-sortable="true">Phone</th>
+                <th data-field="email" data-sortable="true">Email</th>
+                <th data-field="department" data-sortable="true">Department</th>
+                <th data-field="yearLevel" data-sortable="true">Year Level</th>
+                <th data-field="studentSection" data-sortable="true">Section</th>
+                <th data-field="birthday" data-sortable="true">Birthday</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="studentTableBody">
+              <!-- Table rows for student details will be dynamically added here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Edit Student Modal -->
+      <div class="modal fade" id="editStudentModal" tabindex="-1" aria-labelledby="editStudentModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="editStudentModalLabel">Edit Student</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form id="editStudentForm" action="/api/student/update" method="POST">
+                <input type="hidden" id="editStudentId" name="id" value="">
+                <div class="mb-3">
+                  <label for="editStudentName" class="form-label">Name</label>
+                  <input type="text" class="form-control" id="editStudentName" name="username" required>
+                </div>
+                <div class="mb-3">
+                  <label for="editStudentPhone" class="form-label">Phone</label>
+                  <input type="tel" class="form-control" id="editStudentPhone" name="phoneNumber" required>
+                </div>
+                <div class="mb-3">
+                  <label for="editStudentEmail" class="form-label">Email</label>
+                  <input type="email" class="form-control" id="editStudentEmail" name="email" required>
+                </div>
+                <div class="mb-3">
+                  <label for="editStudentDepartment" class="form-label">Department</label>
+                  <select class="form-control" id="editStudentDepartment" name="department" required>
+                    <option value="">Select a Department</option>
+                  </select>                
+                </div>
+                <div class="mb-3">
+                  <label for="editStudentYearLevel" class="form-label">Year Level</label>
+                  <input type="text" class="form-control" id="editStudentYearLevel" name="yearLevel" required>
+                </div>
+                <div class="mb-3">
+                  <label for="editStudentSection" class="form-label">Section</label>
+                    <select class="form-select" id="editStudentSection" name="studentSection" required>
+                        <option value="">Select a section</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                  <label for="editStudentBirthday" class="form-label">Birthday</label>
+                  <input type="date" class="form-control" id="editStudentBirthday" name="birthday" required>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="tab-pane fade" id="teacher" role="tabpanel" aria-labelledby="teacher-tab">
+        <div class="d-flex justify-content-between align-items-center">
+          <h2 class="mb-0">Teacher List</h2>
+          <div class="btn-group">
+            <button class="btn btn-primary" title="Add Teacher" data-bs-toggle="modal" data-bs-target="#addTeacherModal" style="background-color: rgb(43, 226, 58);">Add Teacher</button>
+            <button class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: rgb(60, 186, 49);">
+              <span class="visually-hidden">Toggle Dropdown</span>
+            </button>
+            <ul class="dropdown-menu">
+              <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addDepartmentModal">Add Department</button></li>
+              <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addSectionModal">Add Section</button></li>
+              <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addSubjectModal">Add Subject</button></li>
+            </ul>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-bordered" id="teacherTable" data-toggle="table" data-sortable="true">
+            <thead style="background-color: lightblue;">
+              <tr>
+                <th data-field="name" data-sortable="true">Teacher Name</th>
+                <th data-field="email" data-sortable="true">Email</th>
+                <th data-field="department" data-sortable="true">Department</th>
+                <th data-field="section" data-sortable="true">Section</th>
+                <th data-field="subject" data-sortable="true">Subject</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="teacherTableBody">
+                <!-- Table rows for teacher details will be dynamically added here -->
+            </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Add Department Modal -->
+        <div class="modal fade" id="addDepartmentModal" tabindex="-1" aria-labelledby="addDepartmentModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="addDepartmentModalLabel">Add Department</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <form id="addDepartmentForm" action="/api/department/add" method="POST">
+                  <div class="mb-3">
+                    <label for="departmentName" class="form-label">Department Name</label>
+                    <input type="text" class="form-control" id="departmentName" name="departmentName" required>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Add Department</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add Section Modal -->
+        <div class="modal fade" id="addSectionModal" tabindex="-1" aria-labelledby="addSectionModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="addSectionModalLabel">Add Section</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <form id="addSectionForm" action="/api/section/add" method="POST">
+                  <div class="mb-3">
+                    <label for="departmentSelect" class="form-label">Select a Department</label>
+                    <select class="form-control" id="departmentSelect" name="departmentSelect" required>
+                      <option value="">Select a Department</option>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="sectionName" class="form-label">Section Name</label>
+                    <input type="text" class="form-control" id="sectionName" name="sectionName" required>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Add Section</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add Subject Modal -->
+        <div class="modal fade" id="addSubjectModal" tabindex="-1" aria-labelledby="addSubjectModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="addSubjectModalLabel">Add Subject</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <form id="addSubjectForm" action="/api/subject/add" method="POST">
+                  <div class="mb-3">
+                    <label for="departmentSelectSub" class="form-label">Select a Department</label>
+                    <select class="form-control" id="departmentSelectSub" name="departmentSelectSub" required>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="sectionSelect" class="form-label">Section</label>
+                    <select class="form-select" id="sectionSelect" name="section" required>
+                        <option value="">Select a section</option>
+                    </select>
+                    </div>
+                  <div class="mb-3">
+                    <label for="subjectName" class="form-label">Subject Name</label>
+                    <input type="text" class="form-control" id="subjectName" name="subjectName" required>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Add Subject</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+    <!-- Add Teacher Modal -->
+        <div class="modal fade" id="addTeacherModal" tabindex="-1" aria-labelledby="addTeacherModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title" id="addTeacherModalLabel">Add Teacher</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addTeacherForm" action="/api/teacher/register" method="POST">
+                        <div class="mb-3">
+                        <label for="teacherName" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="teacherName" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                        <label for="teacherEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="teacherEmail" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                        <label for="teacherPass" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="teacherPass" name="password" required>
+                        <span id="passwordStrengthMessage"></span>
+                        </div>
+                        <div class="mb-3">
+                        <label for="teacherDepartment" class="form-label">Department</label>
+                        <select class="form-select" id="teacherDepartment" name="department" required>
+                          <option value="">Select a Department</option>
+                        </select>                        
+                        </div>
+                        <div class="mb-3">
+                        <label for="teacherSection" class="form-label">Section</label>
+                        <select class="form-select" id="teacherSection" name="section" required>
+                            <option value="">Select a section</option>
+                        </select>
+                        </div>
+                        <div class="mb-3">
+                          <label for="teacherSubject" class="form-label">Subject</label>
+                          <select class="form-select" id="teacherSubject" name="subject" required>
+                            <option value="">Select a Subject</option>
+                          </select>
+                          </div>
+                        <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" onclick="addTeacher()">Save</button>
+                        </div>
+                    </form>              
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <!-- Edit Teacher Modal -->
+        <div class="modal fade" id="editTeacherModal" tabindex="-1" aria-labelledby="editTeacherModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title" id="editTeacherModalLabel">Edit Teacher</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                <form id="editTeacherForm" action="/api/teacher/update" method="POST">
+                    <input type="hidden" id="editTeacherId" name="id" value="">
+                    <div class="mb-3">
+                    <label for="editTeacherName" class="form-label">Name</label>
+                    <input type="text" class="form-control" id="editTeacherName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                    <label for="editTeacherEmail" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="editTeacherEmail" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                      <label for="editTeacherDepartment" class="form-label">Department</label>
+                      <select class="form-select" id="editTeacherDepartment" name="department" required>
+                        <option value="">Select a Department</option>
+                      </select>  
+                    </div>
+                    <div class="mb-3">
+                    <label for="editTeacherSection" class="form-label">Section</label>
+                    <select class="form-select" id="editTeacherSection" name="section" required>
+                        <option value="">Select a section</option>
+                    </select>
+                    </div>
+                    <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+                </div>
+            </div>
+            </div>
+        </div>      
+
+        <div class="tab-pane fade" id="attendance-record" role="tabpanel" aria-labelledby="attendance-record-tab">
+          <h2>Attendance Record</h2>
+          <div class="search-container d-flex align-items-center">
+          </div>
+          <div class="table-responsive">
+            <table class="table table-bordered" id="attendanceTable" data-toggle="table" data-sortable="true">
+              <thead style="background-color: lightblue;">
+                <tr>
+                  <th data-field="teacher" data-sortable="true">Proffessor</th>
+                  <th data-field="subject" data-sortable="true">Subject</th>
+                  <th data-field="username" data-sortable="true">Student name</th>
+                  <th data-field="date" data-sortable="true">Date</th>
+                  <th data-field="name" data-sortable="true">Email</th>  
+                  <th data-field="phoneNumber" data-sortable="true">Phone Number</th>
+                  <th data-field="section" data-sortable="true">Section</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="attendanceTableBody">
+                <!-- Table rows for attendance records will be dynamically added here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Logout Modal -->
+        <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="logoutModalLabel">Logout</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <p>Are you sure you want to logout?</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                <a class="btn btn-primary" href="adminLogin.html">Yes</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+
+    // Password validation and strength check
+		document.getElementById('teacherPass').addEventListener('input', function () {
+			const passwordInput = document.getElementById('teacherPass');
+			const password = passwordInput.value;
+			const passwordStrengthMessage = document.getElementById('passwordStrengthMessage');
+
+			// Regex patterns for password strength requirements
+			const lowercaseRegex = /[a-z]/;
+			const uppercaseRegex = /[A-Z]/;
+			const numberRegex = /[0-9]/;
+			const specialCharRegex = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/;
+
+			// Check password strength based on the defined requirements
+			if (password.length < 8 || !lowercaseRegex.test(password) || !uppercaseRegex.test(password) || !numberRegex.test(password) || !specialCharRegex.test(password)) {
+				passwordStrengthMessage.textContent = 'Weak password: Password must be at least 8 characters long and contain lowercase, uppercase, number, and special character.';
+			} else {
+				passwordStrengthMessage.textContent = ''; // Clear the password strength message if the password meets the requirements
+			}
+		});	
+
+        // Add an event listener to the modal to fetch sections when it is shown
+        document.getElementById('addTeacherModal').addEventListener('show.bs.modal', async function () {
+          const response = await fetch('/api/sections');
+          const data = await response.json();
+      
+          const sectionSelect = document.getElementById('teacherSection');
+          sectionSelect.innerHTML = ''; // Clear existing options
+      
+          // Add options for each section
+          data.sections.forEach((section) => {
+            const option = document.createElement('option');
+            option.value = section.name;
+            option.textContent = section.name;
+            sectionSelect.appendChild(option);
+          });
+        });
+
+        // Fetch subjects from the server and populate the dropdown
+        fetch('/api/subjects')
+          .then(response => response.json())
+          .then(data => {
+            const teacherSubject = document.getElementById('teacherSubject');
+            data.forEach(subject => {
+              const option = document.createElement('option');
+              option.value = subject.name;
+              option.text = subject.name;
+              teacherSubject.appendChild(option);
+            });
+          })
+          .catch(error => {
+            console.error('Failed to fetch subjects:', error);
+          });
+
+          // Fetch departments from the server and populate the dropdown
+        fetch('/api/departments')
+          .then(response => response.json())
+          .then(data => {
+            const teacherDepartment = document.getElementById('teacherDepartment');
+            data.forEach(department => {
+              const option = document.createElement('option');
+              option.value = department.name;
+              option.text = department.name;
+              teacherDepartment.appendChild(option);
+            });
+        });  
+
+      
+        // Function to handle the form submission and update the teacher list
+        function addTeacher() {
+          const form = document.getElementById('addTeacherForm');
+          const formData = new FormData(form);
+          const xhr = new XMLHttpRequest();
+
+          xhr.onreadystatechange = function () {
+              if (xhr.readyState === XMLHttpRequest.DONE) {
+              if (xhr.status === 200) {
+                  const response = JSON.parse(xhr.responseText);
+                  const teachers = response.teachers;
+                  updateTeacherList(teachers);
+                  $('#addTeacherModal').modal('hide');
+              } else {
+                  console.error('Failed to register teacher');
+              }
+              }
+          };
+
+          xhr.open(form.method, '/api/teacher/update', true); // Updated URL
+          xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+          xhr.send(new URLSearchParams(formData).toString());
+        }
+
+          // Function to fetch and populate teacher data
+        async function fetchTeachers() {
+            try {
+            const response = await fetch('/api/teachers');
+            const { teachers } = await response.json();
+
+            const teacherTableBody = document.getElementById('teacherTableBody');
+            teacherTableBody.innerHTML = ''; // Clear existing table rows
+
+            teachers.forEach((teacher) => {
+                const row = document.createElement('tr');
+
+                // Create table cells and populate with teacher data
+                const nameCell = document.createElement('td');
+                nameCell.textContent = teacher.name;
+                row.appendChild(nameCell);
+
+                const emailCell = document.createElement('td');
+                emailCell.textContent = teacher.email;
+                row.appendChild(emailCell);
+
+                const departmentCell = document.createElement('td');
+                departmentCell.textContent = teacher.department;
+                row.appendChild(departmentCell);
+
+                const sectionCell = document.createElement('td');
+                sectionCell.textContent = teacher.section;
+                row.appendChild(sectionCell);
+
+                const subjectCell = document.createElement('td');
+                subjectCell.textContent = teacher.subject;
+                row.appendChild(subjectCell);
+
+                const actionCell = document.createElement('td');
+                const editButton = document.createElement('button');
+                editButton.classList.add('edit-button', 'btn', 'btn-primary');
+                editButton.textContent = 'Edit';
+                editButton.addEventListener('click', () => openEditModal(teacher));
+                actionCell.appendChild(editButton);
+
+                const deleteButton = document.createElement('button');
+                deleteButton.classList.add('delete-button', 'btn', 'btn-danger');
+                deleteButton.textContent = 'Delete';
+                deleteButton.addEventListener('click', () => deleteRecord(teacher));
+                actionCell.appendChild(deleteButton);
+
+                row.appendChild(actionCell);
+
+                teacherTableBody.appendChild(row);
+            });
+            // Initialize the DataTable after populating data
+              $('#teacherTable').DataTable();
+            } catch (error) {
+            console.error('Failed to fetch teachers:', error);
+            }
+        }
+
+        // Fetch and populate teacher data when the teacher tab is shown
+        document.getElementById('teacher-tab').addEventListener('shown.bs.tab', fetchTeachers);
+
+        // Add an event listener to the addTeacherForm
+        document.getElementById('addTeacherForm').addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent form submission
+
+            // Make a POST request to register the teacher
+            const response = await fetch('/api/teacher/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: document.getElementById('teacherName').value,
+                email: document.getElementById('teacherEmail').value,
+                password: document.getElementById('teacherPass').value,
+                department: document.getElementById('teacherDepartment').value,
+                section: document.getElementById('teacherSection').value,
+                subject: document.getElementById('teacherSubject').value,
+            }),
+            });
+
+            // Check if the request was successful
+            if (response.ok) {
+            const data = await response.json();
+            const { message, teachers, redirect } = data;
+
+            // Redirect to the specified URL
+            window.location.href = redirect;
+            } else {
+            // Show an error message
+            alert('Failed to register teacher');
+            }
+        });
+
+        // Fetch departments from the server and populate the dropdown
+        fetch('/api/departments')
+          .then(response => response.json())
+          .then(data => {
+            const editTeacherDepartment = document.getElementById('editTeacherDepartment');
+            data.forEach(department => {
+              const option = document.createElement('option');
+              option.value = department.name;
+              option.text = department.name;
+              editTeacherDepartment.appendChild(option);
+            });
+        });
+
+        function openEditModal(teacher) {
+        // Get the editTeacherModal and its form elements
+        const editTeacherModal = document.getElementById('editTeacherModal');
+        const editTeacherForm = document.getElementById('editTeacherForm');
+        const editTeacherName = document.getElementById('editTeacherName');
+        const editTeacherEmail = document.getElementById('editTeacherEmail');
+        const editTeacherDepartment = document.getElementById('editTeacherDepartment');
+        const editTeacherSection = document.getElementById('editTeacherSection');
+
+        // Set the teacher's data in the form inputs
+        editTeacherName.value = teacher.name;
+        editTeacherEmail.value = teacher.email;
+        editTeacherDepartment.value = teacher.department;
+
+        // Fetch subjects from the server and populate the dropdown
+        fetch('/api/subjects')
+          .then(response => response.json())
+          .then(data => {
+            const teacherSubjectSelect = document.getElementById('teacherSubject');
+            data.forEach(subject => {
+              const option = document.createElement('option');
+              option.value = subject.name;
+              option.text = subject.name;
+              teacherSubjectSelect.appendChild(option);
+            });
+          })
+          .catch(error => {
+            console.error('Failed to fetch subjects:', error);
+          });
+
+
+        // Fetch sections and populate the select element
+        fetch('/api/sections')
+            .then(response => response.json())
+            .then(data => {
+            editTeacherSection.innerHTML = ''; // Clear existing options
+
+            // Add options for each section
+            data.sections.forEach(section => {
+                const option = document.createElement('option');
+                option.value = section.name;
+                option.textContent = section.name;
+
+                // Set the selected option based on the teacher's section
+                if (section.id === teacher.section) {
+                option.selected = true;
+                }
+
+                editTeacherSection.appendChild(option);
+            });
+            })
+            .catch(error => {
+            console.error('Failed to fetch sections:', error);
+            });
+
+        // Show the editTeacherModal
+        const bootstrapModal = new bootstrap.Modal(editTeacherModal);
+        bootstrapModal.show();
+        }
+
+        // Function to delete a record
+        function deleteRecord(teacher) {
+        // Display a confirmation dialog before deleting the record
+        const confirmation = confirm(`Are you sure you want to delete the teacher record for ${teacher.name}?`);
+
+        if (confirmation) {
+            // Assuming you have an API endpoint for deleting a teacher record, you can use fetch to send a DELETE request
+            fetch(`/api/teacher/delete?email=${encodeURIComponent(teacher.email)}`, {
+            method: 'DELETE',
+            })
+            .then((response) => {
+                if (response.ok) {
+                // If the deletion is successful, refresh the page
+                location.reload();
+                } else {
+                console.error('Failed to delete teacher record');
+                }
+            })
+            .catch((error) => {
+                console.error('Failed to delete teacher record:', error);
+            });
+        }
+        }
+
+        // Function to fetch and display the student list
+        function fetchStudents() {
+          // Make an AJAX request to the server
+          fetch('/api/students')
+            .then((response) => response.json())
+            .then((data) => {
+              // Clear the table body
+              const studentTableBody = document.getElementById('studentTableBody');
+              studentTableBody.innerHTML = '';
+
+              // Iterate over the student data and create table rows
+              data.students.forEach((student) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                  <td>${student.username}</td>
+                  <td>${student.phoneNumber}</td>
+                  <td>${student.email}</td>
+                  <td>${student.department}</td>
+                  <td>${student.yearLevel}</td>
+                  <td>${student.studentSection}</td>
+                  <td>${student.birthday}</td>
+                `;
+
+                const actionCell = document.createElement('td');
+                const studentEditButton = document.createElement('button');
+                studentEditButton.classList.add('edit-button', 'btn', 'btn-primary');
+                studentEditButton.textContent = 'Edit';
+                studentEditButton.addEventListener('click', () => openStudentEditModal(student));
+                actionCell.appendChild(studentEditButton);
+
+                const deleteStudentButton = document.createElement('button');
+                deleteStudentButton.classList.add('delete-button', 'btn', 'btn-danger');
+                deleteStudentButton.textContent = 'Delete';
+                deleteStudentButton.addEventListener('click', () => deleteStudentRec(student));
+                actionCell.appendChild(deleteStudentButton);
+
+                actionCell.appendChild(studentEditButton);
+                actionCell.appendChild(deleteStudentButton);
+
+                row.appendChild(actionCell);
+
+                studentTableBody.appendChild(row);
+              });
+
+              // Initialize the DataTable after populating data
+              $('#studentTable').DataTable();
+
+            })
+            .catch((error) => {
+              console.error('Failed to fetch students:', error);
+            });
+        }
+
+        // Call the fetchStudents function when the student tab is shown
+        document.getElementById('student-tab').addEventListener('shown.bs.tab', fetchStudents);
+
+        // Call the fetchStudents function initially to load the student list
+        fetchStudents();
+
+      // Fetch departments from the server and populate the dropdown
+      fetch('/api/departments')
+        .then(response => response.json())
+        .then(data => {
+          const editStudentDepartment = document.getElementById('editStudentDepartment');
+          data.forEach(department => {
+            const option = document.createElement('option');
+            option.value = department.name;
+            option.text = department.name;
+            editStudentDepartment.appendChild(option);
+          });
+      }); 
+
+        // Function to open the edit modal and populate with student data
+      function openStudentEditModal(student) {
+        const editStudentModal = document.getElementById('editStudentModal');
+        const editStudentForm = document.getElementById('editStudentForm');
+
+        // Populate the form fields with student data
+        document.getElementById('editStudentName').value = student.username;
+        document.getElementById('editStudentPhone').value = student.phoneNumber;
+        document.getElementById('editStudentEmail').value = student.email;
+        document.getElementById('editStudentDepartment').value = student.department;
+        document.getElementById('editStudentYearLevel').value = student.yearLevel;
+        document.getElementById('editStudentBirthday').value = student.birthday;
+
+        // Fetch sections and populate the select element
+        fetch('/api/sections')
+            .then(response => response.json())
+            .then(data => {
+            editStudentSection.innerHTML = ''; // Clear existing options
+
+            // Add options for each section
+            data.sections.forEach(section => {
+                const option = document.createElement('option');
+                option.value = section.name;
+                option.textContent = section.name;
+
+                // Set the selected option based on the student's section
+                if (section.id === student.section) {
+                option.selected = true;
+                }
+
+                editStudentSection.appendChild(option);
+            });
+            })
+            .catch(error => {
+            console.error('Failed to fetch sections:', error);
+            });
+
+        // Show the modal
+        const modal = new bootstrap.Modal(editStudentModal);
+        modal.show();
+      }
+      
+      // Function to delete a record
+      function deleteStudentRec(student) {
+        // Display a confirmation dialog before deleting the record
+        const confirmation = confirm(`Are you sure you want to delete the student record for ${student.username}?`);
+
+        if (confirmation) {
+            // Assuming you have an API endpoint for deleting a teacher record, you can use fetch to send a DELETE request
+            fetch(`/api/student/delete?email=${encodeURIComponent(student.email)}`, {
+            method: 'DELETE',
+            })
+            .then((response) => {
+                if (response.ok) {
+                // If the deletion is successful, refresh the page
+                location.reload();
+                } else {
+                console.error('Failed to delete student record');
+                }
+            })
+            .catch((error) => {
+                console.error('Failed to delete student record:', error);
+            });
+        }
+        }
+
+        async function fetchAttendanceRecords() {
+          try {
+            const response = await fetch('/api/attendance-record');
+            const data = await response.json();
+
+            const attendanceTableBody = document.getElementById('attendanceTableBody');
+            attendanceTableBody.innerHTML = ''; // Clear existing table rows
+
+            data.forEach((record) => {
+              const row = document.createElement('tr');
+
+              const teacherCell = document.createElement('td');
+              teacherCell.textContent = record.teacher;
+              row.appendChild(teacherCell);
+
+              const subjectCell = document.createElement('td');
+              subjectCell.textContent = record.subject;
+              row.appendChild(subjectCell);
+
+              const nameCell = document.createElement('td');
+              nameCell.textContent = record.username;
+              row.appendChild(nameCell);
+
+              const dateCell = document.createElement('td');
+              dateCell.textContent = record.date;
+              row.appendChild(dateCell);
+
+              const emailCell = document.createElement('td');
+              emailCell.textContent = record.email;
+              row.appendChild(emailCell);
+
+              const phoneCell = document.createElement('td');
+              phoneCell.textContent = record.phoneNumber;
+              row.appendChild(phoneCell);
+
+              const sectionCell = document.createElement('td');
+              sectionCell.textContent = record.section;
+              row.appendChild(sectionCell);
+
+              const statusCell = document.createElement('td');
+              statusCell.textContent = record.action;
+              row.appendChild(statusCell);
+
+              attendanceTableBody.appendChild(row);
+            });
+
+
+            // Initialize the DataTable after populating data
+            $('#attendanceTable').DataTable();
+
+          } catch (error) {
+            console.error('Failed to fetch attendance records:', error);
+          }
+        }
+
+        fetchAttendanceRecords();
+
+         // Add event listener to the logout tab button
+        document.getElementById('logout-tab').addEventListener('click', function() {
+          // Show confirmation dialog
+          if (confirm('Are you sure you want to log out?')) {
+            // If user confirms, redirect to the admin login page
+            window.location.href = 'adminLogin.html'; // Replace with the actual URL of the admin login page
+          }
+        });
+
+      // Function to handle student search
+      function searchStudents() {
+        const searchInput = document.getElementById('studentSearchInput');
+        const searchText = searchInput.value.toLowerCase();
+        const studentTableBody = document.getElementById('studentTableBody');
+        const rows = studentTableBody.getElementsByTagName('tr');
+
+        for (let i = 0; i < rows.length; i++) {
+          const name = rows[i].cells[0].textContent.toLowerCase();
+
+          if (name.includes(searchText)) {
+            rows[i].style.display = '';
+          } else {
+            rows[i].style.display = 'none';
+          }
+        }
+      }
+
+      // Add an event listener to the search button
+      document.getElementById('studentSearchButton').addEventListener('click', searchStudents);
+
+      function searchTeacher() {
+        const searchInput = document.getElementById('teacherSearchInput');
+        const searchText = searchInput.value.toLowerCase();
+        const studentTableBody = document.getElementById('teacherTableBody');
+        const rows = studentTableBody.getElementsByTagName('tr');
+
+        for (let i = 0; i < rows.length; i++) {
+          const name = rows[i].cells[0].textContent.toLowerCase();
+
+          if (name.includes(searchText)) {
+            rows[i].style.display = '';
+          } else {
+            rows[i].style.display = 'none';
+          }
+        }
+      }
+
+      // Add an event listener to the search button
+      document.getElementById('teacherSearchButton').addEventListener('click', searchTeacher);
+
+      function searchAttendance() {
+        const searchInput = document.getElementById('attendanceSearchInput');
+        const searchText = searchInput.value.toLowerCase();
+        const studentTableBody = document.getElementById('attendanceTableBody');
+        const rows = studentTableBody.getElementsByTagName('tr');
+
+        for (let i = 0; i < rows.length; i++) {
+          const name = rows[i].cells[0].textContent.toLowerCase();
+
+          if (name.includes(searchText)) {
+            rows[i].style.display = '';
+          } else {
+            rows[i].style.display = 'none';
+          }
+        }
+      }
+
+      // Add an event listener to the search button
+      document.getElementById('attendanceSearchButton').addEventListener('click', searchAttendance);
+
+      // Fetch departments from the server and populate the dropdown
+      fetch('/api/departments')
+        .then(response => response.json())
+        .then(data => {
+          const departmentSelect = document.getElementById('departmentSelect');
+          data.forEach(department => {
+            const option = document.createElement('option');
+            option.value = department.name;
+            option.text = department.name;
+            departmentSelect.appendChild(option);
+          });
+      });
+
+      // Fetch departments from the server and populate the dropdown
+      fetch('/api/departments')
+        .then(response => response.json())
+        .then(data => {
+          const departmentSelectSub = document.getElementById('departmentSelectSub');
+          data.forEach(department => {
+            const option = document.createElement('option');
+            option.value = department.name;
+            option.text = department.name;
+            departmentSelectSub.appendChild(option);
+          });
+      });        
+        
+
+      // Fetch sections from the server
+      fetch('/api/sections')
+        .then(response => response.json())
+        .then(data => {
+          const sectionSelect = document.getElementById('sectionSelect');
+
+          // Iterate over the sections and create options for each section
+          data.sections.forEach(section => {
+            const option = document.createElement('option');
+            option.value = section.id; // Use the appropriate ID field of your Section model
+            option.text = section.name; // Use the appropriate name field of your Section model
+            sectionSelect.appendChild(option);
+          });
+        })
+        .catch(error => {
+          console.error('Failed to fetch sections:', error);
+        });
+
+        // Add event listener to the form submission
+        document.getElementById('addSubjectForm').addEventListener('submit', (event) => {
+          event.preventDefault(); // Prevent form submission
+
+          const departmentSelectSub = document.getElementById('departmentSelectSub');
+          const sectionSelect = document.getElementById('sectionSelect');
+          const subjectName = document.getElementById('subjectName');
+
+          const selectedDepartment = departmentSelectSub.value;
+          const selectedSection = sectionSelect.value;
+          const subject = subjectName.value;
+
+          // Check if the selected section and department match the database
+          fetch('/api/check-section-department', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              section: selectedSection,
+              department: selectedDepartment,
+            }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.isValid) {
+                // Selected section and department are valid, proceed to save the subject
+                fetch('/api/subject/add', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    name: subject,
+                    section: selectedSection,
+                    department: selectedDepartment,
+                  }),
+                })
+                  .then((response) => response.json())
+                  .then((data) => {
+                    // Reload the page after saving the subject
+                    location.reload();
+                  })
+                  .catch((error) => {
+                    console.error('Failed to save subject:', error);
+                  });
+              } else {
+                // Selected section and department do not match the database
+                console.error('Selected section and department do not match the database');
+              }
+            })
+            .catch((error) => {
+              console.error('Failed to check section and department:', error);
+            });
+        });
+
+</script>   
+  
+  </body>
+  </html>
+  

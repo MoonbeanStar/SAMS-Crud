@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Student {
+  id           String   @id @default(uuid()) @map("_id")
+  username     String
+  phoneNumber  String
+  email        String   @unique
+  password     String
+  department   String
+  yearLevel    String
+  birthday     String
+  userType     String
+  studentSection      String
+}
+
+model Admin {
+  id        String      @id @default(uuid()) @map("_id")
+  username  String
+  password  String
+}
+
+model Section {
+  id         String  @id @default(uuid()) @map("_id")
+  name       String
+  department String
+  createdAt  DateTime @default(now())
+}
+
+model Teacher {
+  id           String   @id @default(uuid()) @map("_id")
+  name         String
+  email        String   @unique
+  password     String
+  department   String
+  section      String   
+  subject      String
+}
+
+model Attendance {
+  id           String   @id @default(uuid()) @map("_id")
+  username     String
+  email        String   @unique
+  phoneNumber  String
+  section      String
+  action       String      
+  date         String   
+  teacher      String
+  subject      String
+}
+
+model Departments {
+  id           String   @id @default(uuid()) @map("_id")
+  name         String   @unique
+}
+
+model Subjects {
+  id           String   @id @default(uuid()) @map("_id")
+  name         String   
+  section      String
+  department   String
+}

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Student Page</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+  <style>
+    /* Optional custom styles */
+    .container {
+      margin-top: 50px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="text-center">Student Attendance Management System</h1>
+    <ul class="nav nav-pills justify-content-center" id="myTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="profile-tab" data-bs-toggle="pill" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="true">Your Profile</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="your-record-tab" data-bs-toggle="pill" data-bs-target="#your-record" type="button" role="tab" aria-controls="your-record" aria-selected="false">Your Record</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="logout-tab" data-bs-toggle="pill" data-bs-target="#logout" type="button" role="tab" aria-controls="logout" aria-selected="false">Logout</button>
+      </li>
+    </ul>
+    <div class="tab-content mt-2" id="myTabContent">
+        <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="mb-0">Your Profile</h2>
+                <!-- Add the "Edit" button -->
+                <button class="btn btn-primary" onclick="editProfile()" style="background-color: green;">Edit</button>
+                <!-- End of "Edit" button -->
+              </div>
+              <div class="table-responsive">
+                <table class="table table-bordered">
+                  <tbody>
+                    <tr>
+                      <th scope="row">Name</th>
+                      <td><span id="profileName"></span></td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Email</th>
+                      <td><span id="profileEmail"></span></td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Phone Number</th>
+                      <td><span id="profilePhoneNumber"></span></td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Department</th>
+                      <td><span id="profileDepartment"></span></td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Year Level</th>
+                      <td><span id="profileYearLevel"></span></td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Section</th>
+                      <td><span id="profileSection"></span></td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Birthday</th>
+                      <td><span id="profileBirthday"></span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>          
+      <div class="tab-pane fade" id="your-record" role="tabpanel" aria-labelledby="your-record-tab">
+        <h2>Your Attendance Record</h2>
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <thead style="background-color: lightblue;">
+              <tr>
+                <th>Proffessor Name</th>
+                <th>Subject</th>
+                <th>Section</th> <!-- Add this line -->
+                <th>Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="attendanceRecordBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="tab-pane fade" id="logout" role="tabpanel" aria-labelledby="logout-tab">
+        <h2>Logout</h2>
+        <p>This is the logout tab content.</p>
+      </div>
+    </div>
+  </div>
+
+<!-- Edit Profile Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editProfileModalLabel">Edit Profile</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="updateProfileForm">
+            <div class="mb-3">
+              <label for="editName" class="form-label">Name</label>
+              <input type="text" class="form-control" id="editName" placeholder="Name">
+            </div>
+            <div class="mb-3">
+              <label for="editEmail" class="form-label">Email</label>
+              <input type="email" class="form-control" id="editEmail" placeholder="Email">
+            </div>
+            <div class="mb-3">
+              <label for="editPhoneNumber" class="form-label">Phone Number</label>
+              <input type="text" class="form-control" id="editPhoneNumber" placeholder="Phone Number">
+            </div>
+            <div class="mb-3">
+              <label for="editDepartment" class="form-label">Department</label>
+              <select class="form-select" id="editDepartment">
+                <option value="" disabled selected>Select your Department</option>
+                <option value="information technology">Information Technology</option>
+                <option value="civil engineering">Civil Engineering</option>
+                <option value="architecture">Architecture</option>
+                <option value="mechanical engineering">Mechanical Engineering</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="editYearLevel" class="form-label">Year Level</label>
+              <select class="form-select" id="editYearLevel">
+                <option value="" disabled selected>Year Level</option>
+                <option value="freshman">Freshman</option>
+                <option value="sophomore">Sophomore</option>
+                <option value="junior">Junior</option>
+                <option value="senior">Senior</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="editBirthday" class="form-label">Birthday</label>
+              <input type="date" class="form-control" id="editBirthday" placeholder="Birthday">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" onclick="saveChanges()">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <script>
+    // Retrieve student profile
+    const urlParams = new URLSearchParams(window.location.search);
+    const studentId = urlParams.get('id');
+    const editProfileButton = document.querySelector('#profile .btn-primary');
+
+    console.log('Student ID:', studentId); // Add this line
+
+    fetch(`/api/student/profile?id=${encodeURIComponent(studentId)}`)
+    .then(response => response.json())
+    .then(data => {
+
+      console.log('Response:', data); // Add this line
+        // Handle the response from the server
+        console.log(data);
+        // Update the HTML elements with the student profile information
+        document.getElementById('profileName').textContent = data.student.username;
+        document.getElementById('profileEmail').textContent = data.student.email;
+        document.getElementById('profilePhoneNumber').textContent = data.student.phoneNumber;
+        document.getElementById('profileDepartment').textContent = data.student.department;
+        document.getElementById('profileYearLevel').textContent = data.student.yearLevel;
+        document.getElementById('profileBirthday').textContent = new Date(data.student.birthday).toLocaleDateString();
+        document.getElementById('profileSection').textContent = data.student.studentSection;
+
+        // Retrieve the attendance records and update the table
+        const attendanceRecords = data.attendanceRecords;
+        const attendanceRecordBody = document.getElementById('attendanceRecordBody');
+        attendanceRecordBody.innerHTML = ''; // Clear the table body
+
+        if (attendanceRecords && attendanceRecords.length > 0) {
+          attendanceRecords.forEach(record => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+            <td>${record.teacher}</td>
+            <td>${record.subject}</td>
+            <td>${record.section}</td>
+            <td>${record.date}</td>
+            <td class="${record.action === 'present' ? 'text-success' : 'text-danger'}" style="font-weight: bold;">${record.action}</td>
+            `;
+            attendanceRecordBody.appendChild(row);
+          });
+        }
+    })
+    .catch(error => {
+        console.error(error);
+        // Handle any errors that occur during the request
+    });
+
+ // Edit Profile button click event handler
+ function editProfile() {
+    // Retrieve the profile information
+    const profileName = document.getElementById('profileName').textContent;
+    const profileEmail = document.getElementById('profileEmail').textContent;
+    const profilePhoneNumber = document.getElementById('profilePhoneNumber').textContent;
+    const profileDepartment = document.getElementById('profileDepartment').textContent;
+    const profileYearLevel = document.getElementById('profileYearLevel').textContent;
+    const profileBirthday = document.getElementById('profileBirthday').textContent;
+
+    // Update the input fields in the modal with the profile information
+    document.getElementById('editName').value = profileName;
+    document.getElementById('editEmail').value = profileEmail;
+    document.getElementById('editPhoneNumber').value = profilePhoneNumber;
+    document.getElementById('editDepartment').value = profileDepartment;
+    document.getElementById('editYearLevel').value = profileYearLevel;
+    document.getElementById('editBirthday').value = profileBirthday;
+
+    // Show the modal
+    $('#editProfileModal').modal('show');
+  }
+
+  // Save Changes button click event handler
+function saveChanges() {
+  // Retrieve the updated profile information from the input fields in the modal
+  const editedName = document.getElementById('editName').value;
+  const editedEmail = document.getElementById('editEmail').value;
+  const editedPhoneNumber = document.getElementById('editPhoneNumber').value;
+  const editedDepartment = document.getElementById('editDepartment').value;
+  const editedYearLevel = document.getElementById('editYearLevel').value;
+  const editedBirthday = document.getElementById('editBirthday').value;
+
+  // Update the profile information in the HTML elements
+  document.getElementById('profileName').textContent = editedName;
+  document.getElementById('profileEmail').textContent = editedEmail;
+  document.getElementById('profilePhoneNumber').textContent = editedPhoneNumber;
+  document.getElementById('profileDepartment').textContent = editedDepartment;
+  document.getElementById('profileYearLevel').textContent = editedYearLevel;
+  document.getElementById('profileBirthday').textContent = editedBirthday;
+
+  // Hide the modal
+  $('#editProfileModal').modal('hide');
+
+  // Send an AJAX request to update the profile in the database
+  $.ajax({
+    url: '/api/student/profile',
+    method: 'PUT', // Change the method to PUT
+    data: {
+      id: studentId, // Pass the student ID
+      profileData: { // Pass the profile data object
+        username: editedName,
+        email: editedEmail,
+        phoneNumber: editedPhoneNumber,
+        department: editedDepartment,
+        yearLevel: editedYearLevel,
+        birthday: editedBirthday,
+      }
+    },
+    success: function (response) {
+      console.log(response);
+      // Profile update successful
+      // You can add any additional logic or display a success message here
+    },
+    error: function (error) {
+      console.error(error);
+      // Handle the error and display an error message
+    }
+  });
+}
+
+        // Add event listener to the logout tab button
+        document.getElementById('logout-tab').addEventListener('click', function() {
+          // Show confirmation dialog
+          if (confirm('Are you sure you want to log out?')) {
+            // If user confirms, redirect to the admin login page
+            window.location.href = 'Login.html'; // Replace with the actual URL of the admin login page
+          }
+        });
+
+  </script>  
+
+</body>
+</html>
